@@ -1,0 +1,184 @@
+---
+title: "Trapezoidal, Simpson, and Romberg Integration Rules"
+author: "Hannah B. Labana, Jomar M. Leaño, Christian Anthony C. Stewart"
+date: "2024-02-29"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+header-includes: |
+  \usepackage{graphics}
+  \graphicspath{ {figures/} }
+  \usepackage{array}
+  \usepackage{amsmath}
+  \usepackage{xcolor}
+  \usepackage{bigints}
+---
+
+```{r setup, include=FALSE}
+  knitr::opts_chunk$set(echo = TRUE)
+  require(PolynomF)
+  require('Deriv')
+  library('pracma')
+```
+
+$\int_1^2 sin(x^2) d x$
+
+## 1. Trapezoid Rule
+
+```{r}
+f = function(x) {sin(x^2)}
+
+# Define the limits of integration
+a = 1
+b = 2
+
+# Number of intervals
+n = 18
+
+# Width of each interval
+h = (b - a) / n
+
+# Trapezoid rule formula
+int = (h / 2) * (f(a) + 2 * sum(sapply(1:(n - 1), function(i) f(a + i * h))) + f(b))
+
+actual = integrate(f, lower = 1, upper = 2)
+```
+
+```{r echo=FALSE}
+paste("Estimated value: ", int)
+paste("Actual value: ", actual[1])
+paste("Error: ", abs(actual$value-int))
+```
+for $n = 18$, we are guaranteed
+
+$$\left\lvert\int_{1}^{2}sin(x^2) - M_n\right\rvert \le 0.001$$
+
+take note that this took around 18 intervals between 1 and 2 which is a lot.
+
+## 2. Simpson's Rule
+
+```{r}
+f = function(x) {sin(x^2)}
+
+# Define the limits of integration
+a = 1
+b = 2
+
+# Number of intervals
+n = 6
+
+simpsons_rule <- function(f, a, b, n) {
+  if (n %% 2 != 0) {
+    stop("Number of subintervals must be even.")
+  }
+  
+  h <- (b - a) / n
+  integral <- f(a) + f(b)  # endpoints
+  
+  # Odd indexed points
+  odd_sum <- sum(sapply(seq(1, n, by = 2), function(i) f(a + i * h)))
+  # Even indexed points
+  even_sum <- sum(sapply(seq(2, n-1, by = 2), function(i) f(a + i * h)))
+  
+  integral <- integral + 4 * odd_sum + 2 * even_sum
+  integral <- integral * h / 3
+  
+  return(integral)
+}
+
+actual = integrate(f, lower = 1, upper = 2)
+```
+
+```{r echo=FALSE}
+paste("Estimated value: ", int <- simpsons_rule(f, a, b, n))
+paste("Actual value: ", actual[1])
+paste("Error: ", abs(actual$value-int))
+```
+
+for $n = 6$, we are guaranteed
+
+$$\left\lvert\int_{1}^{2}sin(x^2) - M_n\right\rvert \le 0.001$$
+
+take note that this took around 6 intervals between 1 and 2 which is significantly more efficient compared to Trapezoid Rule which took 18 intervals.
+
+### Romberg Integration
+```{r}
+romberg_integration = function(num_of_iter, func, lower_bound, upper_bound) {
+    deltax_array = array(data = NA, dim = num_of_iter+1)
+    T_array = array(data = NA, dim = num_of_iter+1)
+    Tx_array = array(data = NA, dim = num_of_iter+1)
+    
+    ptr = 1
+    prev = 1
+    after = 2
+    deltax = (upper_bound - lower_bound) / 2
+    
+    while(ptr < num_of_iter+2) {
+        deltax_array[ptr] = deltax
+        num_of_subintervals = 2^num_of_iter
+        temp = 0
+        x = 1
+        
+        while(x < 2^ptr) {
+            temp = temp + 2 * func(lower_bound + x * deltax)
+            x = x + 1
+        }
+        
+        T_d = (deltax/2) * (func(lower_bound) + temp + func(upper_bound))
+        T_array[ptr] = T_d
+        
+        if(ptr > 1) {
+            Tx = ((2^(2*prev)) * T_array[after] - T_array[prev]) / (2^(2*prev) - 1)
+            Tx_array[prev] = Tx
+            prev = prev + 1
+            after = after + 1
+        }
+        
+        ptr = ptr + 1
+        deltax = deltax / 2
+    }
+    
+    result_df <- data.frame(deltax = deltax_array, T = T_array, Tx = Tx_array + 1)
+    result_df$deltax <- deltax_array
+    result_df$T <- T_array
+    result_df$Tx <- Tx_array
+    
+    return(list(Tx_array, result_df))
+}
+
+func_to_integrate = function(x) {
+    return(sin(x^2))
+}
+
+result = romberg_integration(6, func_to_integrate, 1, 2)
+answer = result[1]
+result_dataframe = result[2]
+```
+
+```{r echo="FALSE"}
+result_dataframe
+```
+
+```{r echo="FALSE"}
+answer
+```
+We can see the estimated answer at the 6th iteration = 0.4944894
+$\\$If we use the pracma library, it gives 0.4945082 with 6 iterations.
+```{r}
+f <- function(x) {
+  sin(x^2)
+}
+
+rom <- romberg(f, 1, 2)
+rom
+```
+Error = |Expected - Actual|
+$\\$
+```{r}
+0.4945082 - 0.4944894
+```
+
+```{r}
+integrate(f,1,2)
+```

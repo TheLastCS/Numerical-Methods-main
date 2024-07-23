@@ -1,0 +1,550 @@
+---
+title: "Problem Set 3"
+author: "Hannah B. Labana, Jomar M. Leaño, Christian Anthony C. Stewart"
+date: "2024-02-29"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+header-includes: |
+  \usepackage{graphics}
+  \graphicspath{ {figures/} }
+  \usepackage{array}
+  \usepackage{amsmath}
+  \usepackage{xcolor}
+  \usepackage{bigints}
+---
+
+```{r setup, include=FALSE}
+  knitr::opts_chunk$set(echo = TRUE)
+  require(PolynomF)
+  require('Deriv')
+  library('pracma')
+```
+
+### 1.If $e^{1.3}$ is approximated by Lagrangian interpolation from the values for $e^0 = 1$, $e^1 = 2.7183$, and $e^2 = 7.3891$ what are the minimum and maximum estimates for the error? Compare to the actual error.
+
+For $\mathrm{n}=2$
+$$
+\begin{aligned}
+& p_2(x)=\frac{\left(x-x_1\right)\left(x-x_2\right)}{\left(x_0-x_1\right)\left(x_0-x_2\right)} y_0+\frac{\left(x-x_0\right)\left(x-x_2\right)}{\left(x_1-x_0\right)\left(x_1-x_2\right)} y_1+\frac{\left(x-x_0\right)\left(x-x_1\right)}{\left(x_2-x_0\right)\left(x_2-x_1\right)} y_2 \\
+& p_2(x)=\frac{(x-1)(x-2)}{(0-1)(0-2)} 1+\frac{(x-0)(x-2)}{(1-0)(1-2)} 2.7183+\frac{(x-0)(x-1)}{(2-0)(2-1)} 7.3891 \\
+& p_2(x)=\frac{x^2-3 x+2}{(-1)(-2)} 1+\frac{x^2-2 x}{(1)(-1)} 2.7183+\frac{x^2-x}{(2)(1)} 7.3891 \\
+& p_2(x)=-2.2183 x^2+3.9366 x+1+3.69455 x^2-3.69455 x \\
+& p_2(x)=1.47625 x^2+0.24205 x+1
+\end{aligned}
+$$
+
+The estimated value at $\mathrm{x}=1.3$ gives:
+$$
+p_2(1.3)=1.47625(1.3)^2+0.24205(1.3)+1 p_2(1.3)=3.809502
+$$
+
+The actual value at $\mathrm{x}=1.3$ gives:
+$$
+f(1.3)=3.669297
+$$
+
+Finding error:
+$$
+E_n(x, f)=\left|f(x)-p_2(x)\right| E_n(x, f)=|3.669297-3.809502|
+$$
+$$ E_n(x, f)=0.1402057 $$
+
+The actual value is 3.669297
+The estimated value is 3.809502.
+Therefore, the error is 0.1402057.
+
+```{r echo=FALSE}
+library(Deriv)
+x = 1.3
+x0 = 0
+x1 = 1
+x2 = 2
+y0 = 1
+y1 = 2.7183
+y2 = 7.3891
+```
+
+```{r}
+l0 = function(x) {((x-x1) * (x-x2)) / ((x0-x1) * (x0-x2))}
+l1 = function(x) {(x * (x - x2)) / (x1 * (x1 - x2))}
+l2 = function(x) {(x * (x - x1)) / (x2 * (x2 - x1))}
+f = function(x) { exp(x) }
+p = function(x) {f(x0) * l0(x) + f(x1) * l1(x) + f(x2) * l2(x)}
+
+p(x)
+f(x)
+
+actual_error = abs(f(x)-p(x))
+actual_error
+```
+
+```{r}
+curve(p, 0, 2, col = "red", lwd = 2, ylab = "P(x), f(x)")
+curve(f, 0, 2, add = T, col = "blue", lwd = 2)
+```
+
+```{r echo=FALSE}
+f = function(x) {exp(x)}
+fprime = Deriv(f, "x")
+fprime2 = Deriv(fprime, "x")
+fprime3 = Deriv(fprime2, "x")
+
+g = function(x) {(x)*(x-1)*(x-2)}
+gprime = Deriv(g, "x")
+```
+
+```{r echo=FALSE}
+fprime3
+gprime
+```
+Now that we have obtained 3rd derivative of f(x) and 1st derivative of g(x), we can now begin to obtain the roots of the 1st derivative of g(x)
+
+Let $g(x) = x(x-1)(x-2)$, then $g\prime(x) = 3x^2-6x+2$. The roots of such equation are
+
+$$x = 1.5773502269, 0.4226497308$$
+```{r}
+f = function(x) {x*(x-1)*(x-2)}
+f(0.4226497308)
+
+min_error = abs(exp(0) / 6 * f(0.4226497308))
+min_error
+max_error = abs(exp(2) / 6 * f(0.4226497308))
+max_error
+```
+Therefore the minimum and maximum error would be 0.06415003 and 0.4740082, respectively.
+The actual value is 3.669297. The estimated value is 3.809502. Therefore, the error we have obtained is 0.1402057.
+Comparing this value to the min and max error, it is relatively close.
+
+
+\newpage
+### 2.Construct the divided difference table from these data
+
+$$\\
+    \begin{array}{cccccc}
+    x & 0.2 & 0.3 & 0.7 & -0.3 & 0.1\\
+    f(x) & 1.23 & 2.34 & -1.05 & 6.51 & -0.06\\
+    \end{array}
+$$
+\begin{center}Use the divided-difference to interpolate for $f(0.4)$\end{center}
+
+$$f[x_0,x_1] = \frac{2.34 - 1.23}{0.3-(0.2)} = \frac{1.11}{0.5} = 2.22 $$
+$$f[x_0,x_1,x_2] = \frac{\frac{-1.05-2.34}{0.7-0.3}-2.22}{0.7-(-0.2)} = \frac{-10.695}{0.9} = \frac{-713}{60}$$
+$$f[x_0,x_1,x_2,x_3] = \frac{\frac{6.51-(-1.05)}{-0.3-0.7}-(\frac{-713}{60})}{0.3-(-0.2)} = \frac{1297}{150}$$
+$$f[x_0,x_1,x_2,x_3,x_4] = \frac{\frac{-0.06-(6.51)}{-0.1-(-0.3)}-(\frac{1297}{150})}{0.1-(-0.2)} = \frac{-15853}{180}$$
+\begin{align*}
+P_4(x) = & 1.23 + (x+0.2)(2.22) \\
+& + (x+0.2)(x-0.3)\left(-\frac{713}{60}\right) \\
+& + (x+0.2)(x-0.3)(x-0.7)\left(\frac{1297}{150}\right) \\
+& + (x+0.2)(x-0.3)(x-0.7)(x+0.3)\left(\frac{15853}{180}\right)
+\end{align*}
+$$P_4(0.4) = 1.23 + 2.22(0.4) + 0.444 + (0.4+0.2)(\frac{-713}{60}(0.4) + \frac{713}{200})+(0.4+0.2)(0.4-0.3)(\frac{1297}{50}(0.4)-\frac{9079}{1500}) + $$
+$$(0.4+0.2)(0.4-0.3)(0.4-0.7)(\frac{15853}{180}(0.4) + \frac{15853}{600})$$
+$$P_4(0.4) = 0.9986899999$$
+\newpage
+
+### 3.You have these values for x and f(x):
+$$\\
+    \begin{array}{cccccc}
+    x & 0.2 & 0.3 & 0.7 & -0.3 & 0.1\\
+    f(x) & 1.23 & 2.34 & -1.05 & 6.51 & -0.06\\
+    \end{array}
+$$
+Find $f(0.5)$ from cubic that starts from $x=0.1$.
+$\\$
+
+$$\\
+    \begin{array}{cccccc}
+    x & -0.3 & -0.2 & 0.1 & 0.3 & 0.7\\
+    f(x) & 6.51 & 1.23 & -0.06 & 2.34 & -1.05\\
+    \end{array}
+$$
+$$\\
+    \begin{array}{cccccc}
+    h & 0.1 & 0.3 & 0.2 & 0.4 \\
+    \end{array}
+$$
+
+divided difference of f(x)
+$$\frac{y_{i+1}-y_i}{x_{i+1}-x_i}$$
+$$j_1 = \frac{y_2 - y_1}{x_2-x_1} = \frac{1.23-6.51}{-0.2-(-0.3)} = \frac{-5.28}{0.1} = -52.8$$
+$$j_2 = \frac{y_3 - y_2}{x_3-x_2} = \frac{-0.06-1.23}{0.1-(-0.2)} = \frac{-1.29}{0.3} = -4.3$$
+$$j_3 = \frac{y_4 - y_3}{x_4-x_3} = \frac{2.34-(-0.06)}{0.3-0.1} = \frac{2.4}{0.2} = 12$$
+$$j_4 = \frac{y_5 - y_4}{x_5-x_4} = \frac{-1.05-2.34}{0.7-0.3} = \frac{-3.39}{0.4} = -8.475$$
+$$A = \begin{pmatrix} 2(h_1+h_2) & h_2 & h_0 \\
+h_2 & 2(h_2+h_3) & h_3 \\
+h_0 & h_3 & 2(h_3+h_4) \\
+\end{pmatrix}
+= 
+\begin{pmatrix} 0.8 & 0.3 & 0.0 \\
+0.3 & 1.0 & 0.2 \\
+0.0 & 0.2 & 1.2 \\
+\end{pmatrix}
+$$
+$$B = \begin{pmatrix} \frac{(j_2-j_1)}{6} \\
+\frac{(j_3-j_2)}{6} \\
+\frac{(j_4-j_3)}{6} \\
+\end{pmatrix}
+= 
+\begin{pmatrix} 291 \\
+97.8 \\
+-122.85 \\
+\end{pmatrix}
+$$
+$$S = A^{-1}B$$
+$$S = \begin{pmatrix} 1.41463414634146 & -0.439024390243902 & 0.0731707317073171 \\
+-0.439024390243902 & 1.17073170731707 & -0.195121951219512 \\
+0.0731707317073171 & -0.195121951219512 & 0.865853658536585 \\
+\end{pmatrix}* 
+\begin{pmatrix} 291 \\
+97.8 \\
+-122.85 \\
+\end{pmatrix}
+$$
+
+$$
+S = \begin{pmatrix} 0 & 359.7329 & 10.7122 & -104.1604 & 0\\
+\end{pmatrix}
+$$
+Find $f(0.5)$ from a cubic that starts from $x = 0.1$
+Based on the given, 0.7 is the only value of x that is greater than 0.5 where the $i$th polynomial taken is  $i-1$. 0.7 is $x_5$ with $i = 5-1 = 4$, so we'll use the $4th$ polynomial to predict on.
+
+$$\begin{array}{cccccc}
+    x & -0.3 & -0.2 & 0.1 & 0.3 & 0.7\\
+\end{array}$$
+$$g_4(0.5) = a_4 * (0.5-x_4)^3 + b_4*(0.5-x_4)^2 + c_4*(0.5-x_4)+d_4$$
+$$a_4 = \frac{S_5-S_4}{6*h_4} = \frac{0-(-104.1604)}{2.4} = 43.40016$$
+$$b_4 = \frac{S_4}{2} = \frac{-104.1604}{2} = -52.0802$$
+$$c_4 = \frac{y_5-y_4}{h_4}-\frac{2*h_4*S_4+h_4 * S_5}{6} = \frac{-1.05-2.34}{0.4}-\frac{2*0.4*(-104.1604)+0.4 * 0}{6} = 5.4131$$
+$$d_4 = y_4 = 2.34$$
+$$g_4(0.5) = 43.40016 * (0.5-0.3)^3 + -52.0802 *(0.5-0.3)^2 + 5.4131*(0.5-0.3)+ 2.34$$
+$$g_4(0.5) = 1.6866 $$
+
+\newpage
+
+### 4.Given function $f(x)=2xcos(2x)$. Use a central difference to compute $f'(2.0)$ and compare it using the $P'(x)$.
+$\\\\$
+The derivative of $f(x)=2xcos(2x)$ is:
+$$2(cos(2x)-2xsin(2x))$$
+Suppose that $2(cos(2x)-2xsin(2x))$ at x = 2.0.
+
+```{r}
+f=function(x){2*x*cos(2*x)} 
+dp = Deriv(f, "x") 
+dp(2.0)
+```
+
+So $f'(2.0) = 4.747133$
+$\\$
+We run here from $0.05$ to $0.05/2^4$:
+```{r}
+n=c(1,2,2^2,2^3,2^4)
+delta_x=0.05/n 
+dfdx=(f(2.0+delta_x)-f(2.0-delta_x))/(2*(delta_x))
+error=dfdx-4.747133
+round(dfdx,5);round(error,5)
+```
+From $0.05/2^5$ to $0.05/2^8$
+```{r}
+n=c(2^5,2^6,2^7,2^8,2^9)
+delta_x=0.05/n 
+dfdx=(f(2.0+delta_x)-f(2.0-delta_x))/(2*(delta_x))
+error=dfdx-4.747133
+round(dfdx,5);round(error,5)
+```
+<!--0.5,1,1.5,2,2.5-->
+```{r}
+f=function(x){(2*x*cos(2*x))} 
+x=c(0.5,1,1.5,2,2.5) 
+d=data.frame(x, f(x))
+d
+```
+
+```{r echo=FALSE}
+j=1:5 
+f1=(f(x[j+1])-f(x[j]))/(x[j+1]-x[j]) 
+d=data.frame(x, f(x), f1)
+d
+```
+
+```{r echo=FALSE}
+j=1:5 
+f2=(f1[j+1]-f1[j])/(x[j+2]-x[j]) 
+d=data.frame(x, f(x), f1, f2)
+d
+```
+
+```{r echo=FALSE}
+j=1:5 
+f3=(f2[j+1]-f2[j])/(x[j+3]-x[j]) 
+d=data.frame(x, f(x), f1, f2, f3) 
+d
+```
+
+```{r echo=FALSE}
+j=1:5 
+f4=(f3[j+1]-f3[j])/(x[j+4]-x[j]) 
+d=data.frame(x, f(x), f1, f2, f3, f4) 
+d
+```
+<!--p=function(x) {-2.745192+(-1.530176)*((x - 1.0)+(x - 0.5))+
+(4.344233)*((x - 1.0)*(x - 0.5)+ (x - 1.5)*(x - 0.5) +
+(x - 2.0)*(x - 1.5))+ (-1.382519)*((x - 2.0)*(x - 1.5)*(x - 0.5)+ 
+(x - 2.5)*(x - 1.5)*(x - 1.0)+
+(x - 2.5)*(x - 1.5)*(x - 0.5))+
+(x - 2.5)*(x-2.0)*(x-1.5)}-->
+
+<!--1.96, 1.98, 2.0, 2.02, 2.04-->
+```{r}
+p=function(x) {-2.745192+(-1.530176)*((x - 1.0)+(x - 0.5))+
+(4.344233)*((x - 1.0)*(x - 0.5)+ (x - 1.5)*(x - 0.5) +
+(x - 2.0)*(x - 1.5))+ (-1.382519)*((x - 2.0)*(x - 1.5)*(x - 0.5)+ 
+(x - 2.5)*(x - 1.5)*(x - 1.0)+
+(x - 2.5)*(x - 1.5)*(x - 0.5))+
+(x - 2.5)*(x-2.0)*(x-1.5)}
+```
+We show that the graph of$f'(x)$ and $P'_4$
+$\\$
+```{r echo=FALSE}
+curve(dp,0.5,2.5, col="red") 
+curve(p,0.5,2.5, add = T, col="blue")
+```
+Comparison of answers
+```{r echo=FALSE}
+answer1 <- 4.747133
+answer2 <- 4.747133
+```
+```{r}
+answers = data.frame(answer1,answer2,dp(2))
+colnames(answers) = c("Central diff ", "Finite diff ", "Actual ") 
+print(answers,row.names = FALSE)
+```
+\newpage
+
+### 5.Use Trapezoid rule to estimate $\int_{1}^{2}\frac{1}{x^2}dx$. Accurate within 0.001.
+
+Let $f(x)$ be a continuous function over $[a, b]$, having a second derivative $f^{\prime \prime}(x)$ over this interval. If $M$ is the maximum value of $\left|f^{\prime \prime}(x)\right|$ over $[a, b]$, then the upper bounds for the error $T_n$ to estimate $\int_a^b f(x) d x$ is
+$$
+\text { Error in } T_n \leq \frac{M(b-a)^2}{12 n^2} .
+$$
+
+We can use the idea of error bound to know the number of subintervals to get the accurate value of the integral given a certain error tolerance. In this case, the error tolerance is 0.001. We begin by determining the value of M, the maximum value of $|f''(x)|$ over $[1,2]$ for $f(x) = \frac{1}{x^2}$.
+
+```{r echo=FALSE}
+library(Deriv)
+f = function(x) 1/x^2
+deriv = Deriv(f, "x")
+dderiv = Deriv(deriv, "x")
+```
+
+so $f''(x) = 6/x^4$. The second derivative is at its maximum when x approaches either positive of negative infinity, as long as $x \neq 0$. Which can be seen here
+
+``` {r}
+curve(dderiv)
+```
+
+In this case, we will be using $x=1$
+$$M = |f''(1)| = \frac{6}{(1)^4} = 6$$
+
+From the error-bound Equation of Error in $T_n \le \frac{M(b-a)^2}{12n^2}$, we have
+
+$$\frac{6(2-1)^2}{12n^2} \le 0.001$$
+$$ \frac{6}{12n^2} \le 0.001$$
+$$ \frac{1}{2n^2} \le 0.001 $$
+$$ 2n^2 \ge \frac{1}{0.001} $$
+$$ \frac{2n^2}{2} \ge \frac{1000}{2} $$
+$$ n^2 \ge 500 $$
+$$ n \ge \sqrt500 $$
+$$ n \ge 10\sqrt5 $$
+
+Since $n$ must be an integer, we take $n = 22$ to satisfy the equation as $10 \sqrt5 = 22.360679775$.
+
+```{r}
+f = function(x) {1/x^2}
+
+# Define the limits of integration
+a = 1
+b = 2
+
+# Number of intervals
+n = 22
+
+# Width of each interval
+h = (b - a) / n
+
+# Trapezoid rule formula
+int = (h / 2) * (f(a) + 2 * sum(sapply(1:(n - 1), function(i) f(a + i * h))) + f(b))
+
+actual = integrate(f, lower = 1, upper = 2)
+```
+
+```{r echo=FALSE}
+paste("Estimated value: ", int)
+paste("Actual value: ", actual[1])
+paste("Error: ", abs(actual$value-int))
+```
+
+for $n = 13$, we are guaranteed
+
+$$\left\lvert\int_{1}^{2}\frac{1}{x^2} - M_n\right\rvert \le 0.001$$
+
+\newpage
+### 6.Use Simpson's rule to estimate $\int_{1}^{2}\frac{1}{x^2}dx$. Accurate within 0.001.
+
+Let $f(x)$ be a continuous function over $[a, b]$, having a fourth derivative $f^{(4)}(x)$ over this interval. If $M$ is the maximum value of $\left|f^{(4)}(x)\right|$ over $[a, b]$, then the upper bounds for the error $S_n$ to estimate $\int_a^b f(x) d x$ is
+
+$$
+\text { Error in } S_n \leq \frac{M(b-a)^5}{180 n^4}
+$$
+
+We can use the idea of error bound to know the number of subintervals to get the accurate value of the integral given a certain error tolerance. In this case, the error tolerance is 0.001. We begin by determining the value of M, the maximum value of $|f^{(4)}(x)|$ over $[1,2]$ for $f(x) = \frac{1}{x^2}$.
+
+```{r echo=FALSE}
+f = function(x) 1/x^2
+deriv1 = Deriv(f, "x")
+deriv2 = Deriv(deriv1, "x")
+deriv3 = Deriv(deriv2, "x")
+deriv4 = Deriv(deriv3, "x")
+deriv4
+```
+
+so $f^{(4)}(x) = 120/x^6$. The fourth derivative is at its maximum when x approaches either positive of negative infinity, as long as $x \neq 0$.
+
+In this case, we will be using $x=1$
+$$M = |f^{(4)}(1)| = \frac{120}{(1)^6} = 120$$
+
+From the error-bound for Simpson's Rule of Error in $S_n \le \frac{M(b-a)^5}{180n^4}$, we have
+$$\frac{120(2-1)^2}{180n^4} \le 0.001$$
+$$\frac{120}{180n^4} \le 0.001$$
+$$\frac{2}{3n^4} \le 0.001$$
+$$ 3n^4 \ge \frac{2}{0.001}$$
+$$ \frac{3n^4}{3} \ge \frac{2000}{3}$$
+$$ n^4 \ge \frac{2000}{3}$$
+$$ n \ge \sqrt[4]{\frac{2000}{3}} $$
+
+Since $n$ must be an integer and subintervals must be even, we take $n = 6$ to satisfy the equation as $\sqrt[4]{\frac{2000}{3}} = 5.081327482$.
+
+```{r}
+f = function(x) {1/x^2}
+
+# Define the limits of integration
+a = 1
+b = 2
+
+# Number of intervals
+n = 6
+
+simpsons_rule <- function(f, a, b, n) {
+  if (n %% 2 != 0) {
+    stop("Number of subintervals must be even.")
+  }
+  
+  h <- (b - a) / n
+  integral <- f(a) + f(b)  # endpoints
+  
+  # Odd indexed points
+  odd_sum <- sum(sapply(seq(1, n, by = 2), function(i) f(a + i * h)))
+  # Even indexed points
+  even_sum <- sum(sapply(seq(2, n-1, by = 2), function(i) f(a + i * h)))
+  
+  integral <- integral + 4 * odd_sum + 2 * even_sum
+  integral <- integral * h / 3
+  
+  return(integral)
+}
+
+actual = integrate(f, lower = 1, upper = 2)
+```
+
+```{r echo=FALSE}
+paste("Estimated value: ", int <- simpsons_rule(f, a, b, n))
+paste("Actual value: ", actual[1])
+paste("Error: ", abs(actual$value-int))
+```
+
+for $n = 6$, we are guaranteed
+
+$$\left\lvert\int_{1}^{2}\frac{1}{x^2} - M_n\right\rvert \le 0.001$$
+
+\newpage
+### 7.Use four iterations of Romberg integration to estimate $\pi = \int_{0}^{1}\frac{4}{1+x^2}dx$. Comment on the accuracy of the result.
+```{r}
+romberg_integration = function(num_of_iter, func, lower_bound, upper_bound) {
+    deltax_array = array(data = NA, dim = num_of_iter+1)
+    T_array = array(data = NA, dim = num_of_iter+1)
+    Tx_array = array(data = NA, dim = num_of_iter+1)
+    
+    ptr = 1
+    prev = 1
+    after = 2
+    deltax = (upper_bound - lower_bound) / 2
+    
+    while(ptr < num_of_iter+2) {
+        deltax_array[ptr] = deltax
+        num_of_subintervals = 2^num_of_iter
+        temp = 0
+        x = 1
+        
+        while(x < 2^ptr) {
+            temp = temp + 2 * func(lower_bound + x * deltax)
+            x = x + 1
+        }
+        
+        T_d = (deltax/2) * (func(lower_bound) + temp + func(upper_bound))
+        T_array[ptr] = T_d
+        
+        if(ptr > 1) {
+            Tx = ((2^(2*prev)) * T_array[after] - T_array[prev]) / (2^(2*prev) - 1)
+            Tx_array[prev] = Tx
+            prev = prev + 1
+            after = after + 1
+        }
+        
+        ptr = ptr + 1
+        deltax = deltax / 2
+    }
+    
+    result_df <- data.frame(deltax = deltax_array, T = T_array, Tx = Tx_array + 1)
+    result_df$deltax <- deltax_array
+    result_df$T <- T_array
+    result_df$Tx <- Tx_array
+    
+    return(list(Tx_array, result_df))
+}
+
+func_to_integrate = function(x) {
+    return(4 / (1 + x^2))
+}
+
+result = romberg_integration(4, func_to_integrate, 0, 1)
+answer = result[1]
+result_dataframe = result[2]
+
+```
+
+```{r echo="FALSE"}
+result_dataframe
+```
+
+```{r echo="FALSE"}
+answer
+```
+We can see the estimated answer at the 4th iteration = 3.141432
+$\\$If we use the pracma library, it gives 3.141593 with 7 iterations.
+```{r}
+f <- function(x) {
+  4 / (1 + x^2)
+}
+
+rom <- romberg(f, 0.2, 1.5)
+rom
+```
+Error = |Expected - Actual|
+$\\$
+```{r}
+3.141593 - 3.141432
+```
+
+
+

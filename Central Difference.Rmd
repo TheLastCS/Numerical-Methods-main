@@ -1,0 +1,95 @@
+---
+title: "Central Difference"
+author: "Hannah B. Labana, Jomar M. Leaño, Christian Anthony C. Stewart"
+date: "2024-04-09"
+output: pdf_document
+
+header-includes: |
+  \usepackage{graphics}
+  \graphicspath{ {figures/} }
+  \usepackage{array}
+  \usepackage{amsmath}
+  \usepackage{xcolor}
+  \usepackage{bigints}
+---
+
+```{r setup, include=FALSE}
+  knitr::opts_chunk$set(echo = TRUE)
+  require(PolynomF)
+  require('Deriv')
+```
+
+
+Given:
+
+$$f(x) = x * sin(x)$$
+Find $f'(0.4)$ using finite difference. $(actual = 0.7578427)$
+
+```{r}
+f=function(x) x*sin(x)
+dp = Deriv(f, "x")
+dp(0.4)
+curve(dp)
+```
+
+## START OF GETTING THE FINITE DIFFERENCE
+```{r}
+f=function(x) x*sin(x)
+x = c(0.2,0.3,0.4,0.5,0.6) 
+d=data.frame(x, f(x))
+d
+```
+
+```{r}
+j=1:5 
+f1=(f(x[j+1])-f(x[j]))/(x[j+1]-x[j]) 
+d=data.frame(x, f(x), f1)
+d
+```
+
+```{r}
+f=function(x) x*sin(x)
+j=1:5 
+f2=(f1[j+1]-f1[j])/(x[j+2]-x[j]) 
+d=data.frame(x, f(x), f1, f2)
+d
+```
+
+```{r}
+f=function(x) x*sin(x)
+j=1:5 
+f3=(f2[j+1]-f2[j])/(x[j+3]-x[j]) 
+d=data.frame(x, f(x), f1, f2, f3) 
+d
+```
+
+```{r}
+f=function(x) x*sin(x)
+j=1:5 
+f4=(f3[j+1]-f3[j])/(x[j+4]-x[j]) 
+d=data.frame(x, f(x), f1, f2, f3, f4) 
+d
+```
+
+```{r}
+f=function(x){sin(x)+x*cos(x)}
+p=function(x) {0.4892220+(0.9094540)*((x - 0.3)+(x - 0.2))+
+    (-0.2258203)*((x - 0.3)*(x - 0.2)+ (x - 0.4)*(x - 0.2) + 
+    (x - 0.5)*(x - 0.4))+ (-0.1466473)*((x - 0.5)*(x - 0.4)*(x - 0.2)+ 
+    (x - 0.6)*(x - 0.4)*(x - 0.3)+(x - 0.6)*(x - 0.4)*(x - 0.2))+ 
+    (x - 0.6)*(x-0.5)*(x-0.4)}
+
+curve(f,0.2,0.6, col="red")
+curve(p,0.2,0.6, add = T, col="blue")
+```
+
+## CENTRAL DIFFERENCE
+
+```{r echo=TRUE}
+f=function(x) x*sin(x)
+n = c(1,2,2^2,2^3,2^4)
+delta_x = 0.05/n
+dfdx = (f(0.4+delta_x)-f(0.4-delta_x))/(2*(delta_x))
+error = dfdx-0.7578427
+round(dfdx, 5);round(error, 5)
+```

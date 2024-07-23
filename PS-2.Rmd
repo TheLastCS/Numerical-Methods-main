@@ -1,0 +1,400 @@
+---
+title: "Problem Set 2"
+author: "Hannah B. Labana, Jomar M. Leaño, Christian Anthony C. Stewart"
+date: "2024-02-29"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+header-includes: |
+  \usepackage{graphics}
+  \graphicspath{ {figures/} }
+  \usepackage{array}
+  \usepackage{amsmath}
+  \usepackage{xcolor}
+  \usepackage{bigints}
+---
+
+```{r setup, include=FALSE}
+  knitr::opts_chunk$set(echo = TRUE)
+  require(PolynomF)
+```
+
+## Problem Set 2
+1. Use the bisection method with a hand calculator or computer to find the real root of $x^3-x-3=0$. Use an error tolerance of $\epsilon = 0.0001$. Graph the function $f (x) = x^3-x-3$ and label the root.
+
+$\\$ The numerical methods for finding the roots are called iterative methods.
+$\\$ $\textbf{Algorithm Bisection Method}$
+$\\$ Define $c = \frac{a+b}{2}$
+$\\$ If $|b-c| \leq \epsilon$ then accept root and exit 
+$\\$ If $f(b) * f(c) \leq 0$ then a = c else b = c
+$\\$ Return to step 1
+
+```{r echo=FALSE}
+func = function(x){ x^3 - x - 3 }
+```
+
+Solving using bisection method:
+
+```{r echo=FALSE}
+df = data.frame(matrix(ncol=7))
+colnames(df) = c("#","a","b","c","f(b)","f(c)","f(b)*f(c)"); count = 0
+
+bisect = function(f,a,b,epsilon){
+  while(TRUE){
+    count <<- count + 1
+    c = (a+b)/2
+    df[nrow(df)+1,] <<- list(count,a,b,c,f(b),f(c),f(b)*f(c)) # output
+    if (abs(b-c)<=epsilon) {df <<- df[-1,]; return(c)}
+    if (f(b)*f(c)<=0) {a=c} else {b=c}
+  }
+}
+
+root = bisect(func,1,2,0.0001)
+print(df, row.names = FALSE)
+root # bisection result
+uniroot(func,c(1,2))$root #uniroot, using Newton's Method
+```
+
+```{r echo=FALSE}
+curve(func, xlim=c(-5,5), ylim=c(-10,10), col="red", lwd=3)
+abline(h = 0, lty = 2)
+abline(v = 0, lty = 2)
+points(root, 0, pch=19, col="green")
+text(root, 0, "x = 1.671692", pos = 3)
+```
+
+  With the interval $[-3, 1.672]$, calculate how many iterations needed:\newline
+    Since $\epsilon = 0.0001$, so $|a-c_n|= 0.0001$.
+    $$|a-c_n|\leq\left[\frac{1}{2}\right]^n(b-a)$$
+    $$0.0001\leq\left[\frac{1}{2}\right]^n[1.672-(-3)]$$
+    $$0.0001\leq\left[\frac{1}{2}\right]^n(4.672)$$
+    $$\log_2\frac{0.0001}{4.672}\leq\left[\frac{1}{2}\right]^nlog_2$$
+    $$n\geq16$$
+
+
+2. The function $f(x)= -3x^3 + 2e^{x^2/2}-1$ has values of zero near x = -0.5 and x = 0.5
+  $\\$a. What is the derivative of f?
+  $$\frac{d}{dx}[-3x^3+2e^{\frac{x^2}{2}}-1]$$
+  $$= -3 * \frac{d}{dx}[x^3] + 2 * \frac{d}{dx}[e^\frac{x^2}{2}]+\frac{d}{dx}[-1]$$
+  $$=- 3 * 3x^2 + 2e^\frac{x^2}{2}*\frac{d}{dx}[\frac{x^2}{2}]  + 0$$
+  $$=- 9x^2 + 2e^\frac{x^2}{2} * \frac{1}{2} * \frac{d}{dx}[x^2] $$
+  $$=-9x^2 + 2e^\frac{x^2}{2}x$$
+  $$=-9x^2 + 2xe^\frac{x^2}{2}$$
+  $\\$b. If you begin with Newton's method at x=0, which root is reached? How many iterations to achieve an error less than $1-^{-5}$?
+  $$f(0) = -3(0^3)+2e^\frac{0^2}{2}-1 = 1$$
+  $$f'(0) = -9(0^2)+2(0)e^\frac{0^2}{2} = 0$$
+  $$x_{n+1} = x_n - \frac{f(x_n)}{f'(x_n)}$$
+  $$x_2 = 0 - \frac{1}{0} = undefined$$
+  When it starts at $x = 0$, we get $undefined$ which prompts us to use a different starting point when using Newton's method.
+  $\\$c. Begin Newton's method at another starting point to get the other zero.
+  1st iteration: $x_1 = -0.2$
+  $$f(-0.2) = -3(-0.2)^3 + 2e^\frac{-0.2^2}{2}-1 = 1.06440268$$
+  $$f'(-0.2) = -9(-0.2)^2 + 2(-0.2)e^\frac{-0.2^2}{2} = -0.768080536$$
+  $$x_2 = -0.2 - \frac{1.06440268}{-0.768080536} = 1.185795132$$
+  $$|x_2-x_1| = |1.185795132-(-0.2)| =1.385795132$$
+  2nd iteration: $x_2 = 1.185795132$
+  $$f(1.185795132) = -3(1.185795132)^3 + 2e^\frac{1.185795132^2}{2}-1 = -1.962247068$$
+  $$f'(1.185795132) = -9(1.185795132)^2 + 2(1.185795132)e^\frac{1.185795132^2}{2} = -7.864581946$$
+  $$x_3 = 1.185795132 - \frac{-1.962247068}{-7.864581946} = 0.9362916373$$
+  $$|x_3-x_2| = |0.9362916373-1.185795132| =0.2495034947$$
+  3rd iteration: $x_3=0.9362916373$
+  $$f(0.9362916373) = -3(0.9362916373)^3 + 2e^\frac{0.9362916373^2}{2}-1 = -0.3621729375$$
+  $$f'(0.9362916373) = -9(0.9362916373)^2 + 2(0.9362916373)e^\frac{0.9362916373^2}{2} = -4.987082379$$
+  $$x_4 = 0.9362916373 - \frac{-0.3621729375}{-4.987082379} = 0.8636694286$$
+  $$|x_4-x_3| = |0.8636694286-0.9362916373| =0.07262220873$$
+  4th iteration: $x_4=0.8636694286$
+  $$f(0.8636694286) = -3(0.8636694286)^3 + 2e^\frac{0.8636694286^2}{2}-1 = -0.02863794569$$
+  $$f'(0.8636694286) = -9(0.8636694286)^2 + 2(0.8636694286)e^\frac{0.8636694286^2}{2} = -4.205176438$$
+  $$x_5 = 0.8636694286 - \frac{-0.02863794569}{-4.205176438} = 0.8568592635$$
+  $$|x_5-x_4| = |0.8568592635-0.8636694286| =0.006810165069$$
+  5th iteration: $x_5=0.8568592635$
+  $$f(0.8568592635) = -3(0.8568592635)^3 + 2e^\frac{0.8568592635^2}{2}-1 = -2.42469513*10^{-4}$$
+  $$f'(0.8568592635) = -9(0.8568592635)^2 + 2(0.8568592635)e^\frac{0.8568592635^2}{2} = -4.1340354068$$
+  $$x_6 = 0.8568592635 - \frac{-2.42469513*10^{-4}}{-4.1340354068} = 0.8568006115$$
+  $$|x_6-x_5| = |0.8568006115-0.8568592635| =0.000058652$$
+  6th iteration: $x_6 = 0.8568006115$
+  $$f(0.8568006115) = -3(0.8568006115)^3 + 2e^\frac{0.8568006115^2}{2}-1 = -1.7984872*10^{-8}$$
+  $$f'(0.8568006115) = -9(0.8568006115)^2 + 2(0.8568006115)e^\frac{0.8568592635^2}{2} = -4.133424464$$
+  $$x_7 = 0.8568006115 - \frac{-1.7984872*10^{-8}}{-4.133424464} = 0.8568006071$$
+  $$|x_7-x_6| = |0.8568006071-0.8568006115| =4.35108283*10^{-9}$$
+  At the 6th iteration, we were able to reach an error less than $10^{-5}$ where $-0.2$ was the starting point.
+  
+3. Use the function from no. 2 and find the root using the secant method where $x_0=0$ and $x_1=1$. Use an error tolerance of $\epsilon=0.001$.
+$$f(x) = -3x^3+2e^{\frac{x^2}{2}}-1$$
+$$x_{n+1} = x_n - f(x_n) * \frac{x_n-x_{n-1}}{f(x_n)-f(x_{n-1})}$$
+1st iteration: $x_1 = 1, x_0 = 0$
+$$f(x_1) = -3(1^3) + 2e^\frac{1^2}{2}-1 = -0.7025574586$$
+$$f(x_0) = -3(0^3) + 2e^\frac{0^2}{2}-1 = 1$$
+$$x_2 = 1-(-0.7025574586)*\frac{1-0}{-0.7025574586-1} = 0.5873516896$$
+2nd iteration: $x_2 = 0.5873516896$
+$$f(x_2) = -3(0.5873516896^3) + 2e^\frac{0.5873516896^2}{2}-1 = 0.7686449665$$
+$$x_3 = 0.5873516896-(-0.7686449665)*\frac{0.5873516896-1}{-0.7686449665-(-0.7025574586)} = 0.8029440794$$
+$$|x_3-x_2| = |0.8029440794 - 0.5873516896| = 0.2155923898$$
+3rd iteration: $x_3 = 0.8029440794$
+$$f(x_3) = -3(0.8029440794^3) + 2e^\frac{0.8029440794^2}{2}-1 = 0.2077417555$$
+$$x_4 = 0.8029440794-(0.2077417555)*\frac{0.8029440794-0.5873516896}{0.2077417555-(0.7686449665)} = 0.8827930456$$
+$$|x_4-x_3| = | 0.8827930456 - 0.8029440794| = 0.07984896617$$
+4th iteration: $x_4 = 0.8827930456$
+$$f(x_4) = -3(0.8827930456^3) + 2e^\frac{0.8827930456^2}{2}-1 = -0.1109815908$$
+$$x_5 = 0.8827930456-(-0.1109815908)*\frac{0.8827930456-0.8029440794}{-0.1109815908-(0.2077417555)} = 0.854989104$$
+$$|x_5-x_4| = | 0.854989104 - 0.8827930456| = 0.02780394155$$
+5th iteration: $x_5 = 0.854989104$
+$$f(x_5) = -3(0.854989104^3) + 2e^\frac{0.854989104^2}{2}-1 = 0.007470629366$$
+$$x_6 = 0.854989104-(0.007470629366)*\frac{0.854989104-0.8827930456}{0.007470629366-(-0.1109815908)} = 0.8567426629$$
+$$|x_6-x_5| = | 0.8567426629 - 0.854989104| = 0.0017535589$$
+6th iteration: $x_6 = 0.8567426629$
+$$f(x_6) = -3(0.8567426629^3) + 2e^\frac{0.8567426629^2}{2}-1 = 2.39490687 * 10^{-4}$$
+$$x_7 = 0.8567426629-(2.39490687 * 10^{-4})*\frac{0.8567426629-0.854989104}{2.39490687 * 10^{-4}-(0.007470629366)} = 0.8571548525$$
+$$|x_7-x_6| = | 0.8571548525 - 0.8567426629| = 0.000412189648$$
+
+$\\$
+4. Consider the system
+$$10.2x+2.4y-4.5z=14.067,$$
+$$-2.3x-7.7y+11.1z=-0.996,$$
+$$-5.5x-3.2y+0.9z=-12.645$$
+$\\$a. Present the augmented matrix of the system.
+
+$$\\\left( 
+    \begin{array}{ccc|c}
+        10.2 & 2.4 & -4.5 & 14.067 \\
+        -2.3 & -7.7 & 11.1 & -0.996 \\
+        -5.5 & -3.2 & 0.9 & -12.645
+    \end{array}
+\right)$$
+
+$\\$In fraction form
+
+$$\\\left( 
+    \begin{array}{ccc|c}
+        \frac{51}{5} & \frac{12}{5} & -\frac{9}{2} & \frac{14067}{1000} \\
+        -\frac{23}{10} & -\frac{77}{10} & \frac{111}{10} & -\frac{249}{250} \\
+        -\frac{11}{2} & -\frac{16}{5} & \frac{9}{10} & -\frac{2529}{200}
+    \end{array}
+\right)$$
+
+$\\$b. Solve the system using Ax= LUx= Ly = b and round the final answer to 4 decimal digits.
+
+Note
+
+$$A= \begin{bmatrix}
+  10.2 & 2.4 & -4.5\\
+  -2.3 & -7.7 & 11.1 \\
+  -5.5 & -3.2 & 0.9
+\end{bmatrix}  $$
+
+
+
+Using Gaussian Elimination method
+
+Here$$A= \begin{bmatrix}
+  10.2 & 2.4 & -4.5  \\
+  -2.3 & -7.7 & 11.1  \\
+  -5.5 & -3.2 & 0.9
+\end{bmatrix}  $$
+$$R_2 \leftarrow R_2-(-0.2255)R1 [L_2,_1 = -0.2255]$$
+$$=\begin{bmatrix}
+  10.2 & 2.4 & -4.5  \\
+  0 & -7.1588 & 10.0853 \\
+  -5.5 & -3.2 & 0.9 
+\end{bmatrix}$$
+$$R_3 \leftarrow R_3 - (-0.5392)R_1 [L_3,_1=-0.5392]$$
+$$=\begin{bmatrix}
+  10.2 & 2.4 & -4.5  \\
+  0 & -7.1588 & 10.0853 \\
+  0 & -1.9059 & -1.5265 
+\end{bmatrix}$$
+$$R_3 \leftarrow R_3 - (0.2662)R_2 [L_3,_2=0.2662]$$
+$$=\begin{bmatrix}
+  10.2 & 2.4 & -4.5  \\
+  0 & -7.1588 & 10.0853 \\
+  0 & 0 & -4.2115
+\end{bmatrix}$$
+
+Given LU Decomposition
+$$U=\begin{bmatrix}
+  10.2 & 2.4 & -4.5  \\
+  0 & -7.1588 & 10.0853  \\
+  0 & 0 & -4.2115
+\end{bmatrix} $$
+
+$$L=\begin{bmatrix}
+  1 & 0 & 0  \\
+  -0.2255 & 1 & 0  \\
+  -0.5392 & 0.2662 & 1
+\end{bmatrix} $$
+Using LU
+First solving Ly = b for y by forward substitution.
+```{r echo=FALSE}
+A=matrix(c(10.2,2.4,-4.5,-2.3,-7.7,11.1,-5.5,-3.2,0.9), nrow = 3, byrow = T) 
+L=matrix(c(1,0,0, -0.2255,1,0, -0.5392,0.2662,1),nrow = 3, byrow = T) 
+U=matrix(c(10.2,2.4,-4.5, 0,-7.1588,10.0853, 0,0,-4.2115), nrow = 3, byrow = T) 
+b=matrix(c(14.067,-0.996,-12.645))
+y=solve(L,b)
+y
+```
+Using LU:
+Then solve Ux = y for x by back substitution.
+```{r echo= FALSE}
+x=solve(U,y) 
+x
+```
+$\\$c. Find the residual vector if the correct solution is x=1.4531001, y=-1.5891949, z=-0.2748947
+```{r}
+ A=matrix(c(10.2,2.4,-4.5,-2.3,-7.7,11.1,-5.5,-3.2,0.9), nrow = 3, byrow = T)
+ b=matrix(c(14.067,-0.996,-12.645), nrow = 3, byrow = T)
+ x_bar=matrix(c(1.4531001, -1.5891949, -0.2748947)) 
+ r=b-A%*%x_bar
+ r
+```
+
+5. Compute the Frobenius norm, maximum column sum, and maximum row sum of the matrix:
+$$\begin{pmatrix}
+10.2& 2.4& 4.5\\
+-2.3& 7.7& 11.1\\
+-5.5& -3.2& 0.9
+\end{pmatrix}$$
+Note:
+$||A||_1 = 18.0$
+$||A||_\infty$
+$$||A||_f = \sqrt{(10.2)^2+(2.4)^2 + (4.5)^2 + (-2.3)^2 + (7.7)^2 + (11.1)^2 + (-5.5)^2 + (-3.2)^2 + (0.9)^2}$$
+$$=\sqrt{104.04 + 5.76 + 20.25 + 5.29 + 59.29 + 123.21 + 30.25 + 10.24 + 0.81}$$
+$$=\sqrt{359.14}$$
+$$= 18.9509894201$$
+$$\approx 18.951$$
+Maximum column sum
+$$||A||_1 = max_{1\leq j \leq n} \sum_{i}^{n} = 1 |a_{ij} $$
+Maximum row sum
+
+$$||A||_\infty = max_{1\leq j \leq n} \sum_{j}^{n} = 1 |a_{ij} $$
+Frobenius Norm:
+$$||A||_f = \sqrt{\sum^m_{i=1}\sum^{n}_{j=1} a^2_{ij}}$$
+The Frobenius norm is 18.95, the maximum column sum is 18.0 while the maximum row sum is 21.1
+$\\\\$
+6. Solve the system of equations given, starting with the initial vector of [0,0,0]:
+\[
+A=\begin{pmatrix}
+  2 & 5 & 1 \\  1& 7&2\\ 1&2&-5
+\end{pmatrix}
+\begin{pmatrix}
+ x_1 \\ x_2\\ x_3
+\end{pmatrix}
+=
+\begin{pmatrix}
+  13\\ 11\\ 1
+\end{pmatrix}
+\]
+
+$\\$a. Solve using the Jacobi method with 2 digit precision.
+
+$$Dx = -(L+U)x + b$$ Jacobi Formula
+
+```{r}
+A=matrix(c(2,5,1,1,7,2,1,2,-5), nrow = 3, byrow = T) 
+b=matrix(c(13,11,1), nrow = 3, byrow = T)
+solve(A,b)
+```
+
+```{r}
+L=matrix(c(0,0,0,1,0,0,1,2,0), nrow = 3, byrow = T) 
+D=matrix(c(2,0,0,0,7,0,0,0,-5), nrow = 3, byrow = T) 
+U=matrix(c(0,5,1,0,0,2,0,0,0), nrow = 3, byrow = T) 
+b=matrix(c(13,11,1),nrow = 3, byrow = T)
+A==L+D+U
+```
+$\\$Note: Let $x^0$ = (0,0,0)
+$$x^1 = -D^{-1}(L+U)(0,0,0)^T + D^{-1}b$$ Iterative formula
+```{r echo=FALSE}
+# Define the matrices
+L <- matrix(c(0,0,0,1,0,0,1,2,0), nrow = 3, byrow = TRUE)
+D <- matrix(c(2,0,0,0,7,0,0,0,-5), nrow = 3, byrow = TRUE)
+U <- matrix(c(0,5,1,0,0,2,0,0,0), nrow = 3, byrow = TRUE)
+b <- matrix(c(13,11,1), nrow = 3, byrow = TRUE)
+
+# Initial guess
+x0 <- matrix(c(0,0,0), nrow = 3, byrow = TRUE)
+
+# Maximum number of iterations
+max_iter <- 100
+
+# Loop until convergence or maximum iterations reached
+for (i in 1:max_iter) {
+  # Perform one iteration
+  x1 <- -solve(D) %*% (L + U) %*% x0 + solve(D) %*% b
+  
+  # Check for convergence (absolute difference between norms)
+  diff <- abs(norm(x1 - x0))
+  if (diff <= 0.001) break
+  
+  # Update for next iteration
+  x0 <- x1
+}
+
+# Print results
+if (i == max_iter) {
+  cat("Convergence not achieved within", max_iter, "iterations.\n")
+} else {
+  cat("Solution after", i - 1, "iterations:\n")
+}
+x1
+```
+
+$\\$b. Solve using the Gauss-Seidel method with 2 digit precision.
+$$(L+D)x = -Ux + b$$
+$$x^{n+1} = -(L+D)^{-1}Ux^n+(L+D)^{-1}b$$
+```{r echo=FALSE}
+# Define the matrices
+L <- matrix(c(0,0,0,1,0,0,1,2,0), nrow = 3, byrow = TRUE)
+D <- matrix(c(2,0,0,0,7,0,0,0,-5), nrow = 3, byrow = TRUE)
+U <- matrix(c(0,5,1,0,0,2,0,0,0), nrow = 3, byrow = TRUE)
+b <- matrix(c(13,11,1), nrow = 3, byrow = TRUE)
+
+# Initial guess
+x0 <- matrix(c(0,0,0), nrow = 3, byrow = TRUE)
+
+# Maximum number of iterations
+max_iter <- 100
+
+# Loop until convergence or maximum iterations reached
+for (i in 1:max_iter) {
+  # Perform one iteration using the Gauss-Seidel Method
+  x1 <- -solve(L + D) %*% U %*% x0 + solve(L + D) %*% b
+  
+  # Check for convergence (absolute difference between norms)
+  diff <- abs(norm(x1 - x0))
+  if (diff <= 0.001) break
+  
+  # Update for next iteration
+  x0 <- x1
+}
+
+# Print results
+if (i == max_iter) {
+  cat("Convergence not achieved within", max_iter, "iterations.\n")
+} else {
+  cat("Solution after", i - 1, "iterations:\n")
+}
+x1
+```
+$\\$c. Solve for ē if the true solution is $x = (1.5,0.33,0.45)^T$ 
+
+```{r}
+A=matrix(c(2,5,1,1,7,2,1,2,-5), nrow = 3, byrow = T) 
+b=matrix(c(13,11,1), nrow = 3, byrow = T)
+x_bar=matrix(c(1.5, 0.33, 0.45)) 
+r=b-A%*%x_bar
+e_bar=solve(A)%*%r
+abs(e_bar)
+```
+
+```r
+p=function(x){1+1/2*x+3/2*xˆ2}
+p=function(x){{(x-1961)(x-1971)}/{(1951-1961)(1951-1871)}(2.8)}
+curve(p,1950,1955,1960,1965,1970,1975)
+points(c(0,-1,1),c(1,2,3), pch =19)
+text(c(0,-1,1),c(1,2,3),c("(0,1)","(-1,2)","(1,3)"),
+     pos = c(3,4,4))
+
+
+```
+$$f\left(x\right)=\frac{\left(x-1961\right)\left(x-1971\right)}{\left(1951-1961\right)\left(1951-1871\right)}\left(2.8\right)+\frac{\left(x-1951\right)\left(x-1971\right)}{\left(1961-1951\right)\left(1961-1971\right)}\left(3.2\right)+\frac{\left(x-1951\right)\left(x-1961\right)}{\left(1971-1951\right)\left(1971-1961\right)}\left(4.5\right)$$

@@ -1,0 +1,352 @@
+---
+title: "Problem Set 1"
+author: "Hannah Labana, Jomar Leaño, Christian Stewart"
+output: pdf_document
+date: "2024-01-31"
+header-includes: |
+  \usepackage{graphicx}
+  \graphicspath{ {figures/} }
+  \usepackage{array}
+  \usepackage{amsmath}
+  \usepackage{xcolor}
+  \usepackage{bigints}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+require('SciViews')
+require('PolynomF')
+require('Deriv')
+```
+
+## Problem Set 1
+
+1.Prove that $lim_{x\rightarrow -1}{2x}+1=-1.$
+
+Note: For any given $\epsilon > 0$, there exists a $\delta > 0$ such that $|f (x) - f (x_0)| < \epsilon$ whenever $|x - x_0| < \delta$.
+
+  Draft:
+
+$$|2x+1 - (-1)| < \epsilon$$
+$$|2x+2| < \epsilon$$
+$$|2||x-(-1)|<\epsilon$$
+$$|x-(-1)|< \frac{\epsilon}{|2|} $$
+  **End of Draft:** $\delta\leq\frac{\epsilon}{2}$
+
+  **Start of Formal Solution:**
+$\newline$ Given we have $\epsilon$ > 0. $\newline$ Let $\delta \leq \frac{\epsilon}{2}$ shows that when $|x-(-1)|< \delta$, then $|2x+1-(-1)|<\epsilon$
+
+  $$|x-(-1)| < \delta$$
+  $$|x-(-1)| < \frac{\epsilon}{2}$$
+  $$|2||x-(-1)|<\epsilon$$
+  $$|2x+2| < \epsilon$$
+  $$|2x+1-(-1)| < \epsilon$$
+  
+Therefore, $lim_{x\rightarrow -1}{2x}+1=-1$.
+
+2.Determine all the numbers c which satisfy the conclusions of the Mean Value Theorem for the following function and graph using R with the point/s identified. $f(x)=x^3-4x^2-2x-5$ on $[-10,10]$
+
+Let $f(x)$ be continuous for $a \leq x \leq b$, and let it be differentiable for $a < x < b$. Then there is at least one point $\xi$ in $(a, b)$ for which $$f(b) - f(a) = f'(\xi)(b - a)$$
+$$f\prime(\xi) = \frac{f(b) - f(a)}{b - a}$$
+```{r echo=FALSE}
+x = polynom()
+p = x^3 - 4*x^2 - 2*x - 5
+
+# Intervals
+a = -10
+b = 10
+
+# Defining formula for Mean Value Theorem
+f <- function(x) {
+return(p(x))
+}
+
+# Solving the Mean Value Theorem
+c <- (f(b) - f(a)) / (b - a)
+
+```
+
+```{r echo=FALSE}
+# Solving derivative
+dpdx = deriv(p)
+dpdxm <- dpdx - c
+dpdxm
+
+# Getting the roots
+dpdxm_zeros = solve(dpdxm)
+dpdxm_zeros
+```
+
+Since f(x) is a polynomial, it is both continuous and differentiable, so $f'(x) = 3x^2 - 8x - 2$.
+we then replace x with the values provided which was $[-10,10]$
+
+
+$$f(x) = x^3 - 4x^2 - 2x - 5$$
+$$f(-10) = (-10)^3 - 4(-10)^2 - 2(-10) - 5$$
+$$= -1000 - 400 + 20 - 5$$
+$$= f(x) = -1385$$
+
+$$f(x) = x^3 - 4x^2 - 2x - 5$$
+$$f(10) = 10^3 - 4(10)^2 - 2(10) - 5$$
+$$= 1000 - 400 - 20 - 5$$
+$$= f(x) = 575$$
+we then use this equation for the calculation of the point we need to find
+$$f\prime(\xi) = \frac{f(b) - f(a)}{b - a}$$
+$$a = -1385, b = 575$$
+$$3\xi^2 - 8\xi - 2 = \frac{575-(-1385)}{10-(-10)}$$
+
+$$3\xi^2 - 8\xi - 2 = 98$$
+
+$$3\xi^2 - 8\xi - 100 = 0$$
+we can now solve for the roots of the equation using the following
+
+$$x = \frac{-b \pm \sqrt{b^2-4(a)(c)}}{2a}$$
+$$x = \frac{-(-8) \pm \sqrt{(-8)^2-4(3)(-100)}}{2(3)}$$
+$$x = \frac{8 \pm \sqrt{64-12(-100)}}{6}$$
+$$x = \frac{8 \pm \sqrt{64+1200}}{6}$$
+$$x = \frac{8 \pm \sqrt{1264}}{6}$$
+$$x_0 \approx  7.258796, x_1 \approx  -4.592130$$
+the solutions on $[-10, 10]$ are $x_0 \approx  7.258796, x_1 \approx  -4.592130$
+
+```{r echo=FALSE}
+# get the parallel lines - slope and given point
+m = dpdx(dpdxm_zeros[1])
+# get the y-intercept (b)
+# y - y0 = m (x - x0) -> point slope form
+# y = m (x - x0) + y0
+# y = mx - mx0 + y0 -> y-intercept form (y=mx+b)
+# b = -mx0 + y0 
+x1 = dpdxm_zeros[1]
+y1 = p(dpdxm_zeros[1])
+x2 = dpdxm_zeros[2]
+y2 = p(dpdxm_zeros[2])
+b1 = -m*x1 + y1 # intercept of left parallel line
+b2 = -m*x2 + y2 # intercept of right parallel line
+
+curve(p, -10, 10, col="black", lwd=3)
+curve(dpdxm, -10, 10, col="blue", lwd=3, add=T)
+
+points(dpdxm_zeros[1], p(dpdxm_zeros[1]), pch=19, col="red")
+points(dpdxm_zeros[2], p(dpdxm_zeros[2]), pch=19, col="red")
+
+points(dpdxm_zeros[1], dpdxm(dpdxm_zeros[1]), pch=19, col="green")
+points(dpdxm_zeros[2], dpdxm(dpdxm_zeros[2]), pch=19, col="green")
+abline(h=0, lty=2)
+
+# plotting parallel lines
+abline(a=b1, b=m, pch=5, lty=2, col="gray")
+abline(a=b2, b=m, pch=5, lty=2, col="gray")
+
+# original slope
+m_orig = c # (f(b)-f(a))/(b-a)
+b3 = (f(b) + f(a))/2
+abline(a=b3, b=m_orig, pch=15, lty=2, lwd=2, col="orange")
+
+text(dpdxm_zeros[1], dpdx(dpdxm_zeros[1]), "f'(-4.5921)", pos = 3)
+text(dpdxm_zeros[2], dpdx(dpdxm_zeros[2]), "f'(7.2587)", pos = 1)
+
+```
+3.Find the point c that satisfies the mean value theorem for integrals on the interval [-1,1]. The function is $f(x)=3e^2$
+
+**Using the Mean Value Theorem**
+           $$Mean Value Theorem = f'\left(c\right) = \frac{{f\left(b\right)-f\left(a\right)}}{{b - a}}$$
+We then derive:
+ $$f'(x) = \frac{d}{dx} (2e^x)$$
+ $$      = 2e^x$$
+ $$f(1)  = 2e^1 = 2e$$
+ $$f(-1) = 2e^{-1}$$
+Average rate of change: 
+ $$\frac{f(1)-f(-1)}{1-(-1)}$$ 
+ $$=\frac{2e^1-2e^{-1}}{2}$$ 
+ $$= e - \frac{1}{e}$$
+Finding c:
+ $$f'(c) = e - \frac{1}{e}$$
+ $$2e^c  = e - \frac{1}{e}$$
+ $$e^c   = \frac{e-\frac{1}{e}}{2}$$
+ $$c   = ln(\frac{e-\frac{1}{e}}{2})$$
+ $$\therefore c   \approx ln(\frac{e-\frac{1}{e}}{2})$$
+4.Consider the function $f(x) = cos(\frac{x}{2})$
+  $\newline$
+  a. Find the fourth Taylor polynomial for $f$ at $x=\pi$
+  $$f(x) = \cos(\frac{x}{2}), f(\pi) = 0$$
+  $$f^1(x) = -\frac{\sin(\frac{x}{2})}{2}, f^1 (\pi) = -\frac{1}{2}$$, which is -0.5
+  $$f^2(x) = -\frac{\cos(\frac{x}{2})}{4}, f^2 (\pi) = 0$$
+  $$f^3(x) = \frac{\sin(\frac{x}{2})}{8}, f^3 (\pi) = -\frac{1}{8}$$, which is 0.0125
+  $$f^4(x) = \frac{\cos(\frac{x}{2})}{16}, f^4 (\pi) = 0$$
+  $$f^5(x) = -\frac{\sin(\frac{x}{2})}{32}, f^5 (\pi) = -\frac{1}{32}$$, which is -0.03125
+    to find the fourth Taylor Polynomial, we use the following equation:
+  
+  $$p_4 = f(x_0) + \frac{f^1(x_0)}{1!}(x-x_0) + \frac{f^2(x_0)}{2!}(x-x_0)^2 + \frac{f^3(x_0)}{3!}(x-x_0)^3 + \frac{f^4(x_0)}{4!}(x-x_0)^4$$
+  $$p_4 = 0 + \frac{-\frac{1}{2}}{1!}(x-\pi) + \frac{0}{2!}(x-\pi)^2 + \frac{\frac{1}{8}}{3!}(x-\pi)^3 + \frac{0}{4!}(x-\pi)^4$$
+  $$p_4 = \frac{-\frac{1}{2}}{1!}(x-\pi)+ \frac{\frac{1}{8}}{3!}(x-\pi)^3$$
+  $\newline$b. Use the fourth Taylor polynomial to approximate $cos(\frac{\pi}{2})$.
+   $\newline$To find the fourth Taylor Polynomial, we use the following equation:
+  
+  $$p_4 = f(x_0) + \frac{f^1(x_0)}{1!}(x-x_0) + \frac{f^2(x_0)}{2!}(x-x_0)^2 + \frac{f^3(x_0)}{3!}(x-x_0)^3 + \frac{f^4(x_0)}{4!}(x-x_0)^4$$
+  $$p_4 = 0 + \frac{-\frac{1}{2}}{1!}(\frac{\pi}{2}-\pi) + \frac{0}{2!}(\frac{\pi}{2}-\pi)^2 + \frac{\frac{1}{8}}{3!}(\frac{\pi}{2}-\pi)^3 + \frac{0}{4!}(\frac{\pi}{2}-\pi)^4$$
+  $$p_4 = -\frac{1}{2}(-\frac{\pi}{2}) + \frac{1}{48}(-\frac{\pi}{2})^3$$
+  $$p_4 = \frac{\pi}{4} - \frac{\pi^3}{324}$$
+  
+  $$Actual Value = 0.7071068$$
+  $$Estimated Value \approx 0.7046527$$
+```{r echo=FALSE}
+f = function(x){cos(x/2)}
+p1 = function(x){(-1/2)*(x-pi)}
+p4 = function(x){(-1/2)*(x-pi)+(1/48)*((x-pi)^3)}
+curve(f, -10, 10, col="purple", lwd=3)
+curve(p1, -10, 10, col="orange", lwd=2, add=T, lty=2)
+curve(p4, -10, 10, col="red", lwd=2, add=T, lty=2)
+
+text(-3.1, 0.8, "cos(x/2)", pos = 1, col="purple")
+text(1.5, 0.8, "p1", pos = 4, col="orange")
+text(0, 0.6, "p3", pos = 1, col="red")
+
+points(pi, f(pi), pch=19, lwd=4, col="green")
+points(pi/2, p4(pi/2), pch=19, lwd=2, col="red")
+points(pi/2, f(pi/2), pch=19, lwd=2, col="orange")
+```
+  
+  $\newline$c. Use the fourth Taylor polynomial to bound the error
+   By Taylor's Theorem with remainder, there exists a $\varepsilon$ in the interval $(\frac{\pi}{2},\pi)$ such that the remainder when approximating $cos(\pi/4)$ by the fourth Taylor polynomial satisfies
+
+  $$R_4 \left(\frac{\pi}{2}\right) = \frac{f^5(\frac{\pi}{2})}{5!} (x-\pi)^5$$  
+  We do not know the exact value of $c$, we find an upper bound on $R_4 \left(\frac{\pi}{2}\right)$ by determining the maximum value of $|f^5(x)|$ on the interval $(\frac{\pi}{2},\pi)$.
+  
+  $$-0.02209709, -0.03125000$$
+```{r echo=FALSE}
+f=function(x){-sin(x/2)/32}
+f(c(pi/2,pi))
+curve(f,pi/2,pi)
+```
+  
+  $$R_5 \left(\frac{\pi}{2}\right) \leq \frac{-0.03125000}{5!} (\frac{\pi}{2}-\pi)^5 \approx 0.002490395$$
+  $$cos \left(\frac{\pi}{4}\right) \approx p_4\left(\frac{\pi}{2}\right) + R_4 \left(\frac{\pi}{2}\right)
+= 0.7046527 + 0.002490395$$
+  $$cos \left(\frac{\pi}{4}\right) \approx 0.7071431$$
+```{r echo=FALSE}
+0.7046527 + 0.002490395 
+abs(cospi(1/4) - (0.7046527 + 0.002490395))
+```
+  
+5.If fl(x) is the machine approximated number of a real number
+x and $\epsilon$ is the corresponding relative error, then show that $fl(x) = (1 - \epsilon)x$
+
+**Let:**
+$\newline$	$fl(x) = Approximate Value$
+$\newline$	$x     = Real Value$
+$\newline$	$\epsilon     = Relative Error$
+
+**Relative Error:**
+$\newline$ 	$$\epsilon = |\frac{x - fl(x)}{x}|$$
+
+**Then we solve for fl(x):**
+	$$\epsilon|x|   = |x - fl(x)|$$
+	$$fl(x)  = x - \epsilon|x|$$
+	$$fl(x)  = (1 - \epsilon)x$$
+
+
+6.For the following numbers $x$ and their corresponding approximations $x_A$, find the number of significant digits in $x_A$ with respect to $x$ and find the relative error.
+
+
+$$Error = True Value - Approximate Value$$
+$$Relative Error = Error/True Value$$
+
+  a. $x=451.01, x_A=451.023$
+
+the real number $x=451.01$ can be represented as $451.01=(-1)^0$ x $0.45101$ x $10^3$
+
+we have $s=0, \beta=10^3, e=4, d_1=4, d_2=5, d_3=1, d_4=0, d_5=1$
+
+Suppose that the true value $x=451.01$ and the approximate value $x_A=451.023$. Then the Error$(x_A)$ and the Relative Error $(x_A)$:
+
+**Error = $451.01-451.023$ = $-0.013$**
+
+**Relative Error = $\frac{451.01-451.023}{451.01}$ = $-0.00002882419$**
+
+If $x_A$ is an approximation to $x$, then we say that $x_A$ approximates $x$ to $r$ significant $\beta$-digits if
+$$\left|x-x_A\right| \leq \frac{1}{2} \beta^{s-r+1}$$
+where $$\beta^s \leq |x|$$
+Since $10^2<451.01=x$, $s=2$ and to determine r, we get
+$$|x-x_A|=0.013 \leq \frac{1}{2}\times 10^{2-r+1}=\frac{1}{2}\times 10^{-1} = 0.05$$
+$$2-r+1=-1$$
+$$r=4$$
+$$\left|451.01-451.023\right| \leq \frac{1}{2} 10^{2-4+1}$$
+$$0.013 \leq \frac{1}{2} 0.1$$
+$$0.013 \leq 0.05$$
+which is true, so the approximate number has 4 significant digits and the relative error is $-0.00002882419$
+
+  b. $x=-0.04518, x_A=-0.045113$
+
+Suppose that the true value $x=-0.04518$ and the approximate value $x_A=-0.045113$. Then the Error$(x_A)$ and the Relative Error $(x_A)$:
+
+**Error = $-0.04518-(-0.045113)$ = $0.000067$**
+
+**Relative Error = $\frac{-0.04518-(-0.045113)}{-0.04518}$ = $0.001482957$**
+
+If $x_A$ is an approximation to $x$, then we say that $x_A$ approximates $x$ to $r$ significant $\beta$-digits if
+$$\left|x-x_A\right| \leq \frac{1}{2} \beta^{s-r+1}$$
+where $$\beta^s \leq |x|$$
+Since $10^{-2}<0.04518=x$, $s=-2$ and to determine r, we get
+$$|x-x_A|=0.000067 \leq \frac{1}{2}\times 10^{-2-r+1}=\frac{1}{2}\times 10^{-3} = 0.0005$$
+$$-2-r+1=-3$$ 
+$$r=2$$ 
+$$\left|-0.04518-(-0.045113)\right| \leq \frac{1}{2} 10^{-2-2+1}$$
+$$0.000067 \leq \frac{1}{2} 10$$
+$$0.000067 \leq 5$$
+which is true, so the approximate number has 2 significant digits and the relative error is $0.001482957$
+
+  c. $x=23.4604, x_A=23.4213$
+
+Suppose that the true value $x=23.4604$ and the approximate value $x_A=23.4213$. Then the Error$(x_A)$ and the Relative Error $(x_A)$:
+
+**Error = $23.4604-23.4213$ = $0.0391$**
+
+**Relative Error = $\frac{23.4604-23.4213}{23.4604}$ = $0.001666638$**
+
+If $x_A$ is an approximation to $x$, then we say that $x_A$ approximates $x$ to $r$ significant $\beta$-digits if
+$$\left|x-x_A\right| \leq \frac{1}{2} \beta^{s-r+1}$$
+where $$\beta^s \leq |x|$$
+Since $10^1<23.4604=x$, $s=1$ and to determine r, we get
+$$|x-x_A|=0.0391 \leq \frac{1}{2}\times 10^{1-r+1}=\frac{1}{2}\times 10^{-1} = 0.05$$
+$$1-r+1=-1$$
+$$r=2$$
+$$\left|23.4604-23.4213\right| \leq \frac{1}{2} 10^{1-2+1}$$
+$$0.0391 \leq \frac{1}{2} 1$$
+$$0.0391 \leq 0.5$$
+which is true, so the approximate number has 2 significant digits and the relative error is $0.001666638$
+
+7.Find the condition number for the following functions
+$\newline$ a.$f(x)=2x^2$
+$\newline$The derivative of the equation is $f'(x) = 4x$
+$$CN = \Bigg|\frac{f'(x)}{f(x)}x\Bigg|$$
+$$=\Bigg|\frac{4x}{2x^2}x\Bigg|$$
+$$=\frac{4}{2}$$
+$$CN = 2$$
+
+b.$f(x)=2\pi^x$
+$\newline$The derivative of the equation is $f'(x) = 2\pi^x * ln\pi$
+$$CN = \Bigg|\frac{f'(x)}{f(x)}x\Bigg|$$
+$$ = \Bigg|\frac{2\pi^xln\pi}{2\pi^x}x\Bigg|$$
+$$CN = |x|ln\pi$$
+
+c.$f(x)=2b^x$
+$\newline$The derivative of the equation is $f'(x) = 2b^xlnb$
+$$CN = \Bigg|\frac{f'(x)}{f(x)}x\Bigg|$$
+$$= \Bigg|\frac{2b^xlnb}{2b^x}x\Bigg|$$
+$$CN=|x|lnb$$
+
+
+8.Determine if the following series converges or diverges. If it converges determine its sum.
+$$ \sum_{n=1}^\infty \frac{1}{2^n}$$
+Listing the sequence gives us     
+$$n=1,2,3,...$$
+$$\frac{1}{2},\frac{1}{4},\frac{1}{8}, \frac{1}{16},...,\frac{1}{2^n}$$
+We can see that the common ratio is $r=\frac{1}{2}$
+Therefore:
+$$S_n =\frac{a_1(1-r^n)}{1-r}$$
+$$=\frac{\frac{1}{2}(1-\frac{1}{2}^n)}{1-\frac{1}{2}}$$
+$$S_n=1-\frac{1^n}{2}$$
+Now, the summation of the series 1 starting at 1 as n $\rightarrow \infty$ is equal to the limit of S as n $\rightarrow \infty$.
+ $$ S_n = \frac{\frac{1}{2}(1)}{1-\frac{1}{2}} = \frac{\frac{1}{2}}{1-\frac{1}{2}} = \frac{\frac{1}{2}}{\frac{1}{2}} = 1$$
+    $$lim_{n\rightarrow\infty} S_n = 1$$
+   So, the series is convergent and its sum is 1.
